@@ -5,7 +5,7 @@ CXXFLAGS = -mp=gpu -cuda
 #-DUSE_OMP_ACCELERATOR
 
 OBJ = dummy.o util.o 
-TARGET = tt5
+TARGET = bin
 
 all: $(TARGET)
 

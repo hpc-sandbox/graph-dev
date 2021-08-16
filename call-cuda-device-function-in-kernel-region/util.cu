@@ -1,19 +1,16 @@
 #include <iostream>
 
-__device__ int myAtomicAdd(int *address, int incr)
+__device__ int myAtomicAdd(int* address, int incr)
 {
-    // Create an initial guess for the value stored at *address.
-    int guess = *address;
-    int oldValue = atomicCAS(address, guess, guess + incr);
+  int old = *address, assumed;
 
-    // Loop while the guess is incorrect.
-    while (oldValue != guess)
-    {
-        guess = oldValue;
-        oldValue = atomicCAS(address, guess, guess + incr);
-    }
-
-    return oldValue;
+  do 
+  {
+    assumed = old;
+    old = atomicCAS(address, assumed, incr + assumed);
+  } while (assumed != old);
+  
+  return old;
 }
 
 template<typename T>
