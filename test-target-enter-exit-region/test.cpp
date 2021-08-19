@@ -21,7 +21,8 @@ class Dummy
     {
       array_ = new T[n_];
       memset(array_, 0, sizeof(T)*n_);
-#pragma omp target enter data map(alloc:this[:1],array_[0:n_])
+#pragma omp target enter data map(to:this[:1])
+#pragma omp target enter data map(alloc:array_[0:n_])
     }
     
    ~Dummy()
@@ -50,9 +51,10 @@ class Dummy
      int failure_order = 0;
 
 #pragma omp target teams distribute parallel for \
-     map(from: array_[0:n_]) 
+     map(always, from: array_[0:n_]) 
      for (int i = 0; i < n_; i++)
      {
+       array_[i] = i;
        __atomic_compare_exchange(&array_[i], &compare, &val, week, success_order, failure_order);
      }
 
