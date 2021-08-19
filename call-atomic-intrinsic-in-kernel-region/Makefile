@@ -6,7 +6,7 @@ CC = nvcc
 CXXFLAGS = -std=c++11 -O3 -Wall -fopenmp -DUSE_OMP_ACCELERATOR
 #-mp=gpu -cuda -DUSE_OMP_ACCELERATOR
 
-OBJ = dummy.o  
+OBJ = test.o  
 
 all: $(OBJ)
 

@@ -4,7 +4,7 @@ CC = nvcc
 CXXFLAGS = -mp=gpu -cuda 
 #-DUSE_OMP_ACCELERATOR
 
-OBJ = dummy.o util.o 
+OBJ = test.o util.o 
 TARGET = bin
 
 all: $(TARGET)
