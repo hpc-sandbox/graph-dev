@@ -47,14 +47,12 @@ class Dummy
      int success_order = 1;
      int failure_order = 0;
 
-#pragma omp target teams distribute parallel for \
-    map(from: array_[0:n_]) 
+#pragma omp target teams distribute parallel for 
      for (int i = 0; i < n_; i++)
      {
+       array_[i] = i;
        __atomic_compare_exchange(&array_[i], &compare, &val, week, success_order, failure_order);
      }
-
-     std::cout << "---Success----" << array_[n_-1] << std::endl;
    }
 
   //private:   
@@ -84,9 +82,12 @@ int main(int argc, char *argv[])
   Dummy<int> *d = new Dummy<int>(n);
   const int x = d->n_;
 
-#pragma omp target enter data map(to:d) map(to:d->array_[0:x])
+#pragma omp target enter data map(to:d[:1])
+#pragma omp target enter data map(alloc:d->array_[0:x])
   d->atomic_test();
 #pragma omp target exit data map(from:d->array_[0:x])
+     
+  std::cout << "---Success----" << d->array_[x-1] << std::endl;
 
   delete d;
 
