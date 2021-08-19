@@ -47,7 +47,8 @@ class Dummy
      int success_order = 1;
      int failure_order = 0;
 
-#pragma omp target teams distribute parallel for 
+#pragma omp target teams distribute parallel for \
+    map(from: array_[0:n_]) 
      for (int i = 0; i < n_; i++)
      {
        __atomic_compare_exchange(&array_[i], &compare, &val, week, success_order, failure_order);
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
 #pragma omp target enter data map(to:d) map(to:d->array_[0:x])
   d->atomic_test();
 #pragma omp target exit data map(from:d->array_[0:x])
- 
+
   delete d;
 
   return 0;
