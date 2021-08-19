@@ -17,53 +17,47 @@ template<typename T>
 class Dummy
 {
 	public:
-    Dummy(int n): n_(n)
+    Dummy(int n): 
+      n_(n), array_(nullptr), cmp_(5), 
+      val_(6), sord_(1), ford_(0), wk_(false)
     {
       array_ = new T[n_];
-      memset(array_, 0, sizeof(T)*n_);
 #pragma omp target enter data map(to:this[:1])
 #pragma omp target enter data map(alloc:array_[0:n_])
     }
-    
-   ~Dummy()
-    {
-#pragma omp target exit data map(delete:array_[0:n_])
-      delete[] array_;
-    }
   
-   /* 
+   ~Dummy() 
+   { 
+#pragma omp target exit data map(delete:array_[0:n_])
+     delete[] array_; 
+   }
+   /*
    Dummy(const Dummy &d) 
    {
      n_ = d.n_;
+     cmp_ = d.cmp_;
+     val_ = d.val_;
+     wk_ = d.wk_;
+     sord_ = d.sord_;
+     ford_ = d.ford_;
      memcpy(array_, d.array_, sizeof(T)*n_); 
-   } 
+   }
    */
-
    Dummy(const Dummy &d) = delete;
    Dummy& operator=(const Dummy& d) = delete;
+   
+   void atomic(int const& i)
+   { __atomic_compare_exchange(&array_[i], &cmp_, &val_, wk_, sord_, ford_); }
 
-   void atomic_test()
-   {
-     int compare = 5;
-     int val = 6;
-     bool week = false;
-     int success_order = 1;
-     int failure_order = 0;
-
-#pragma omp target teams distribute parallel for \
-     map(always, from: array_[0:n_]) 
-     for (int i = 0; i < n_; i++)
-     {
-       array_[i] = i;
-       __atomic_compare_exchange(&array_[i], &compare, &val, week, success_order, failure_order);
-     }
-
-     std::cout << "---Success----" << array_[n_-1] << std::endl;
-   }
+   int get(int const& i) const { return array_[i]; }
+   
+   void set(int const& i, int val) { array_[i] = val; }
 
   private:   
-   T* array_;
    int n_; 
+   T* array_;
+   int cmp_, val_, sord_, ford_;
+   bool wk_; 
 };
 
 template class Dummy<int>;
@@ -85,8 +79,28 @@ int main(int argc, char *argv[])
   }
   
   std::cout << "Size: " << n << std::endl;
+  
+  int *array2 = new int[n];
+  for (int i = 0; i < n; i++)
+    array2[i] = i;
+
   Dummy<int> d(n);
-  d.atomic_test();
  
+#pragma omp target enter data map(alloc:array2[0:n])
+
+#pragma omp target teams distribute parallel for \
+  map(always, tofrom: array2[0:n]) 
+  for (int i = 0; i < n; i++)
+  {
+    d.set(i,i);
+    d.atomic(i);
+    array2[i] += d.get(i);
+  }
+
+  std::cout << "---Success----" << array2[n-1] << std::endl;
+#pragma omp target exit data map(delete:array2[0:n])
+  
+  delete []array2;
+  
   return 0;
 }
