@@ -1,18 +1,16 @@
 CXX = clang++
 #nvc++ 
-CC = nvcc 
-#-g -G -gencode arch=compute_70,code=sm_70
 
-CXXFLAGS = -std=c++11 -O3 -Wall -fopenmp -DUSE_OMP_ACCELERATOR
+CXXFLAGS = -std=c++11 -O3 -Wall -fopenmp -fopenmp-targets=nvptx64
 #-mp=gpu -cuda -DUSE_OMP_ACCELERATOR
 
-OBJ = test.o  
+BIN = test 
 
-all: $(OBJ)
+all: $(BIN)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS)  -o $@ $^
 
 
 clean:
-	rm -rf *~ $(OBJ) 
+	rm -rf *~ $(BIN) 
