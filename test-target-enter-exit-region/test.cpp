@@ -21,7 +21,7 @@ class Dummy
     {
       array_ = new T[n_];
       memset(array_, 0, sizeof(T)*n_);
-#pragma omp target enter data map(alloc:array_[0:n_])
+#pragma omp target enter data map(alloc:this[:1],array_[0:n_])
     }
     
    ~Dummy()
