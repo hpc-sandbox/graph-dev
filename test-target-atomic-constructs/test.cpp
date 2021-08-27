@@ -77,8 +77,7 @@ int main(int argc, char *argv[])
 
 #pragma omp target teams distribute parallel for \
   map(always, tofrom: array2[0:n]) \
-  lastprivate(m)
-
+  map(always, tofrom: m) 
   for (int i = 0; i < n; i++)
   {
     d.set(i,i);
