@@ -67,10 +67,17 @@ class Dummy
        if (array_[i].d_ > max_data.d_)
          max_data = array_[i];
 
-       if (array_[i].d_ == max_data.d_)
+       auto result = std::find_if(array_, array_ + n_, 
+           [&](Data const& d) { return (((d.i_ == max_data.i_) 
+               || (d.d_ == max_data.d_))); });
+
+       if (result == array_ + n_)
        {
-         if (array_[i].i_ > max_data.i_)
-           max_data = array_[i];
+         if (array_[i].d_ == max_data.d_)
+         {
+           if (array_[i].i_ > max_data.i_)
+             max_data = array_[i];
+         }
        }
      } 
    }
@@ -113,6 +120,7 @@ int main(int argc, char *argv[])
   {
     Data max_data;
     d.max(max_data);
+
     array2[i] += max_data.d_;
   }
 
